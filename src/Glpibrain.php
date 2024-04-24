@@ -34,6 +34,8 @@
 // ----------------------------------------------------------------------
 
 // Class of the defined type
+
+
 class Glpibrain extends CommonDBTM {
 
    static $tags = '[GLPIBRAIN_ID]';
@@ -63,6 +65,11 @@ class Glpibrain extends CommonDBTM {
       }
 
       return $menu;
+   }
+
+   static function processIncident($id) {
+      #This function calls de neural network to process the incident and get trained to show a possible solution or classification
+
    }
 
 }

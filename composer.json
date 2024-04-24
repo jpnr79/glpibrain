@@ -11,5 +11,7 @@
             "php": "7.4.0"
         },
         "sort-packages": true
-    }
+    },
+    "description": "GLPI plugin that provides solutions for incidents using a knowledge base",
+    "name": "nselar/glpibrain"
 }
