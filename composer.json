@@ -13,5 +13,6 @@
         "sort-packages": true
     },
     "description": "GLPI plugin that provides solutions for incidents using a knowledge base",
-    "name": "nselar/glpibrain"
+    "name": "nselar/glpibrain",
+    "license": "GPL-3.0"
 }
