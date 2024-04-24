@@ -14,5 +14,5 @@
     },
     "description": "GLPI plugin that provides solutions for incidents using a knowledge base",
     "name": "nselar/glpibrain",
-    "license": "GPL-3.0"
+    "license": "GPL-3.0-or-later"
 }
