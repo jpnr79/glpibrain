@@ -1,3 +1,4 @@
+
 <?php
 
 /**
@@ -29,26 +30,31 @@
  */
 
 // ----------------------------------------------------------------------
-// Original Author of file:
-// Purpose of file:
+// Original Author of file: Nicolas Sela Ramos
+// Purpose of file: Glpibrain class
 // ----------------------------------------------------------------------
 
-// Class of the defined type
-
+// Avoid direct access to the file
+if (!defined('GLPI_ROOT')) {
+   die("You may not access this file directly");
+}
 
 class Glpibrain extends CommonDBTM {
 
    static $tags = '[GLPIBRAIN_ID]';
 
-   // Should return the localized name of the type
-
-
    /**
+    * Shows the glpibrain plugin in the menu
     * @see CommonGLPI::getMenuName()
    **/
    static function getMenuName() {
       return _n('GlpiBrain', 'GlpiBrains', 1, 'glpibrain');
    }
+
+   /**
+    * Link to the page of the plugin
+    * @see CommonGLPI::getMenuContent()
+   **/
 
    static function getMenuContent() {
 
@@ -67,9 +73,139 @@ class Glpibrain extends CommonDBTM {
       return $menu;
    }
 
-   static function processIncident($id) {
-      #This function calls de neural network to process the incident and get trained to show a possible solution or classification
+   /**
+    * This function retrieves all the incidents from the database and returns them
+      * @return array $incidents
+    */
 
+   public function getIncidents() {
+      // Fetch the tickets data from glpi database
+      global $DB;
+      // I need to create a procedure to get the incidents from the database with details like, id, name, date, assignee, category, status, expected solution, real solution
+      $query = "SELECT ticket.id AS incident_id, ticket.name AS incident_title, ticket.date AS incident_date, u.name AS assignee_name, ticket.status AS incident_status, IFNULL(ticket.itilcategories_id, 0) AS category_id
+                  FROM glpi_tickets ticket
+                  JOIN glpi_tickets_users tu ON ticket.id = tu.tickets_id AND tu.type = 2
+                  JOIN glpi_users u ON tu.users_id = u.id";
+      
+      $data = $DB->request($query);
+      if($data) {
+         return $data;
+      } else {
+         return [];
+      }
+   }
+
+   /**
+    * This function retrieves the incident data from the database
+    * @param int $id
+    * @return string $state
+    */
+
+   public function getIncidentStatus($sid) {
+      switch ($sid) {
+         case 1:
+            $state = 'New';
+            break;
+         case 2:
+            $state = 'Processing (Assigned) ';
+            break;
+         case 3:
+            $state = 'Processing (Planned)';
+            break;
+         case 4:
+            $state = 'Pending';
+            break;
+         case 5:
+            $state = 'Solved';
+            break;
+         case 6:
+            $state = 'Closed';
+            break;
+         default:
+            $state = 'unknown';
+            break;
+      }
+
+      return $state;
+
+   }
+
+   /**
+    * This function retrieves the incident category from the database if it exists
+    * @param int $id
+    * @return string $category
+    */
+
+   public function getIncidentCategory($cid) {
+      // Fetch the category data from glpi database
+      
+      if($cid) {
+         global $DB;
+         $query = "SELECT name FROM glpi_itilcategories WHERE id = $cid";
+         $data = $DB->request($query);
+         if($data) {
+            return $data[0]['name'];
+         } else {
+            return 'Unknown';
+         }
+      } else {
+         return 'Unknown';
+      }
+   }
+
+   /**
+    * This function retrieves the incident data from the database
+    * @param int $id
+    * @return array $incident
+    */
+    private function getIncident($id) {
+      // Fetch the ticket data from glpi database
+      if($id) {
+         global $DB;
+         $query = "SELECT ticket.id AS incident_id, ticket.name AS incident_title, ticket.date AS incident_date, u.name AS assignee_name, ticket.status AS incident_status, IFNULL(ticket.itilcategories_id, 0) AS category_id
+               FROM glpi_tickets ticket
+               JOIN glpi_tickets_users tu ON ticket.id = tu.tickets_id AND tu.type = 2
+               JOIN glpi_users u ON tu.users_id = u.id
+               WHERE ticket.id = $id";
+         $data = $DB->request($query);
+      } 
+
+      if($data) {
+         return $data;
+      } else {
+         return [];
+      }
+      
+    }
+
+   /**
+    * This function retrieves the incident data from the database
+      * @param int $id
+      * @return array $incident
+      */
+
+   public function processIncident($id) {
+      
+   }
+
+   /**
+    * This function tokenizes the incident data
+      * @param string $incident
+      * @return array $tokens
+      */
+
+   private function tokenize($incident) {
+      
+   }
+
+   /**
+    * Learn from the real solution and train the neural network
+    * @param array $tokens the incident data input
+    * @param array $solution the real solution
+    */
+
+   private function trainNeuralNetwork($tokens, $solution) {
+      
    }
 
 }

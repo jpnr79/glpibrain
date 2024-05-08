@@ -9,3 +9,5 @@ Add your plugin description here.
 * Refer to [GitFlow](http://git-flow.readthedocs.io/) process for branching
 * Work on a new branch on your own fork
 * Open a PR that will be reviewed by a developer
+
+Needed to install python flask, all php modules, the python gensim library and download the 'word2vec-google-news-300' model
