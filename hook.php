@@ -75,6 +75,12 @@ function plugin_glpibrain_install()
         $DB->query($query) or die("Error creating table glpi_plugin_glpibrain_solutions: ".$DB->error());
     }
 
+
+    #look for the operating system and the user to give him privileges to execute docker.
+    $get_os = php_uname('s');
+    $user = $output = shell_exec('whoami');
+
+
     #CronTask::Register(GlpiBrain::class, 'solutions', 'plugin_glpibrain', __('Solutions', 'glpibrain'), 'daily', 1);
     return true;
 }

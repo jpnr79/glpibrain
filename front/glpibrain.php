@@ -39,8 +39,20 @@ Html::header(__('GLPIBrain Plugin'), $_SERVER['PHP_SELF'], "plugins", Glpibrain:
 
         // Begin HTML Output
         echo "<div class='center'>";
-        echo "<link rel='stylesheet' type='text/css' href='css/style.css'>";
+        echo "<link rel='stylesheet' type='text/css' href='css/incident_table.css'>";
         echo "<h1>" . __('Incidents table') . "</h1>";
+
+        echo '<script>
+            function RealSol() {
+                var x;
+                var site = prompt("Please enter your name:", "Write Here");
+                if (site != null) {
+                    x = "Welcome to " + Popupsmart + "! Have a great day";
+                    document.getElementById("demo").innerHTML = x;
+                }
+            }
+            </script>';
+        
 
         // Display the table
         echo "<table class='tab_cadre_fixe s'>";
@@ -48,6 +60,7 @@ Html::header(__('GLPIBrain Plugin'), $_SERVER['PHP_SELF'], "plugins", Glpibrain:
         echo "<tr>";
         echo "<th>" . __('ID') . "</th>";
         echo "<th>" . __('Incident') . "</th>";
+        echo "<th>" . __('Description') . "</th>";
         echo "<th>" . __('Date') . "</th>";
         echo "<th>" . __('Assignee') . "</th>";
         echo "<th>" . __('Status') . "</th>";
@@ -63,20 +76,19 @@ Html::header(__('GLPIBrain Plugin'), $_SERVER['PHP_SELF'], "plugins", Glpibrain:
         $data = $glpibrain->getIncidents();
 
         // Populate the table rows
-        foreach ($data as $row) {
+        for ($index = 0; $index < count($data['incident_id']); $index++) {
             
             echo "<tr>";
-            echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $row['incident_id'] . "'>" . $row['incident_id'] . "</td>";
-            echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $row['incident_id'] . "'>" . $row['incident_title'] . "</a></td>";
-            echo "<td>" . $row['incident_date'] . "</td>";
-            echo "<td>" . $row['assignee_name'] . "</td>";
-            echo "<td>" . $glpibrain->getIncidentStatus($row['incident_status']) . "</td>";
-            echo "<td>" . $glpibrain->getIncidentCategory($row['category_id']) . "</td>";
-            echo "<td>" . $glpibrain->processIncident($row['incident_id']) . "</td>";
-            echo "<td>";
-            #for ($i = 0; $i < count($exp_solution); $i++) {
-                #echo $exp_solution[$i] . "<br>";
-            #}
+            echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "'>" . $data['incident_id'][$index] . "</a></td>";
+            echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "'>" . $data['incident_title'][$index] . "</a></td>";
+            echo "<td>" . $data['incident_content'][$index] . "</td>";
+            echo "<td>" . $data['incident_date'][$index] . "</td>";
+            echo "<td>" . $data['assignee_name'][$index] . "</td>";
+            echo "<td>" . $glpibrain->getIncidentStatus($data['incident_status'][$index]) . "</td>";
+            echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index],$data['category_id'][$index]) . "</td>";
+            echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
+            #Add a button that displays a pop up window with a form to add a real solution and button to submit the form
+            echo "<td><button onclick='RealSol()'>Add Solution</button>";
             echo "</td>";
             echo "</tr>";
         }
