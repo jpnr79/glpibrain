@@ -62,7 +62,7 @@ function plugin_glpibrain_install()
     $default_key_sign = DBConnection::getDefaultPrimaryKeySignOption();
 
     #database is glpi_plugin_glpibrain_solutions
-    if(!$DB->tableExists("glpi_plugin_glpibrain_solutions")) {
+    if(!$DB->tableExists("glpibrain_solutions")) {
         $query = "CREATE TABLE `glpi_plugin_glpibrain_solutions` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `name` varchar(255) NOT NULL,
@@ -98,9 +98,9 @@ function plugin_glpibrain_uninstall()
 
     ProfileRight::deleteProfileRights(['glpibrain:read']);
 
-    if($DB->tableExists("glpi_plugin_glpibrain_solutions")) {
-        $query = "DROP TABLE `glpi_plugin_glpibrain_solutions`";
-        $DB->query($query) or die("Error dropping table glpi_plugin_glpibrain_solutions: ".$DB->error());
+    if($DB->tableExists("glpibrain_solutions")) {
+        $query = "DROP TABLE `glpibrain_solutions`";
+        $DB->query($query) or die("Error dropping table glpibrain_solutions: ".$DB->error());
     }
 
     return true;

@@ -30,76 +30,89 @@
 
 
 // Reference necessary classes 
-include ('../../../inc/includes.php');
+include('../../../inc/includes.php');
 
-// Include your plugin's main class
-#include("src/Glpibrain.php");
+use Glpi\Dashboard\Dashboard;
 
-Html::header(__('GLPIBrain Plugin'), $_SERVER['PHP_SELF'], "plugins", Glpibrain::class);
+//Session::checkRight('plugin_glpibrain', READ);
 
-        // Begin HTML Output
-        echo "<div class='center'>";
-        echo "<link rel='stylesheet' type='text/css' href='css/incident_table.css'>";
-        echo "<h1>" . __('Incidents table') . "</h1>";
+Html::header(__('GLPIBrain Plugin'), $_SERVER['PHP_SELF'], "plugins", "GLPIBrain");
+echo "<div class='center'>";
+echo "<link rel='stylesheet' type='text/css' href='css/incident_table.css'>";
+echo "<h1>" . __('Incidents table') . "</h1>";
+// Create the searchTable function
+echo "<script type='text/javascript' src='js/incident_table.js'></script>";
 
-        echo '<script>
-            function RealSol() {
-                var x;
-                var site = prompt("Please enter your name:", "Write Here");
-                if (site != null) {
-                    x = "Welcome to " + Popupsmart + "! Have a great day";
-                    document.getElementById("demo").innerHTML = x;
-                }
-            }
-            </script>';
-        
 
-        // Display the table
-        echo "<table class='tab_cadre_fixe s'>";
-        echo "<thead>";
+// Display the table
+echo "<table id=incidentTable class='tab_cadre_fixes'>";
+echo "<thead>";
+echo "<tr>";
+echo "<th>" . __('ID') . "</th>";
+echo "<th>" . __('Incident') . "</th>";
+echo "<th>" . __('Date') . "</th>";
+echo "<th>" . __('Assignee') . "</th>";
+echo "<th>" . __('Status') . "</th>";
+echo "<th>" . __('Category') . "</th>";
+echo "<th>" . __('Expected Solution') . "</th>";
+echo "<th>" . __('Real Solution') . "</th>";
+echo "</tr>";
+echo "</thead>";
+echo "<tbody>";
+
+// Create a new instance of the Glpibrain class and get the incidents
+$glpibrain = new Glpibrain();
+$data = $glpibrain->getIncidents();
+
+if (empty($data)) {
+    echo "<tr>";
+    echo "<td colspan='8'>" . __('No incidents found') . "</td>";
+    echo "</tr>";
+} else {
+    echo "<tr>";
+    echo "<td><input type='number' id='searchInput' onkeyup='searchonTable(0)' onchange='searchonTable(0)' placeholder='Search by id..'></td>";
+    echo "<td><input type='text' id='searchInput' onkeyup='searchonTable(1)' onchange='searchonTable(1)' placeholder='Search by title..'></td>";
+    echo "<td><input type='date' id='searchInput' onkeyup='searchonTable(2)' onchange='searchonTable(2)' placeholder='Search by date..'></td>";
+    echo "<td><input type='text' id='searchInput' onkeyup='searchonTable(3)' onchange='searchonTable(3)' placeholder='Search by assignee..'></td>";
+    echo "<td><select id='searchSelect' onchange='searchonTable(4)'>
+            <option value=''>" . __('All') . "</option>
+            <option value='1'>" . __('Open') . "</option>
+            <option value='2'>" . __('Closed') . "</option>
+            <option value='3'>" . __('Pending') . "</option>
+            </select></td>";
+    echo "<td><input type='text' id='searchInput' onkeyup='searchonTable(5)' placeholder='Search by category..'></td>";
+    echo "</tr>";
+
+    // Populate the table rows
+    for ($index = 0; $index < count($data['incident_id']); $index++) {
         echo "<tr>";
-        echo "<th>" . __('ID') . "</th>";
-        echo "<th>" . __('Incident') . "</th>";
-        echo "<th>" . __('Description') . "</th>";
-        echo "<th>" . __('Date') . "</th>";
-        echo "<th>" . __('Assignee') . "</th>";
-        echo "<th>" . __('Status') . "</th>";
-        echo "<th>" . __('Category') . "</th>";
-        echo "<th>" . __('Expected Solution') . "</th>";
-        echo "<th>" . __('Real Solution') . "</th>";
+
+        #Add a link to the ticket on hover show the incident_content in a box
+        echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "'>" . $data['incident_id'][$index] . "</a></td>";
+        echo "<td> 
+                <a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "' onmouseover='showDetail(\"" . $data['incident_content'][$index] . "\")' onmouseleave=closeDiv()>" . $data['incident_title'][$index] . "</a>
+          </td>";
+        echo "<td>" . $data['incident_date'][$index] . "</td>";
+        echo "<td>" . $data['assignee_name'][$index] . "</td>";
+        echo "<td>" . $glpibrain->getIncidentStatus($data['incident_status'][$index]) . "</td>";
+        echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index], $data['category_id'][$index]) . "</td>";
+        echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
+        #the button executes openWindow and send as arguments the incident_id and the incident_content
+        echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ", \"" . $data['incident_content'][$index] . "\")'>" . __('Add') . "</button></td>";
+        echo "</td>";
         echo "</tr>";
-        echo "</thead>";
-        echo "<tbody>";
+    }
 
-        // Create a new instance of the Glpibrain class and get the incidents
-        $glpibrain = new Glpibrain();
-        $data = $glpibrain->getIncidents();
+    echo "</tbody>";
+    echo "</table>";
+    echo "</div>";
 
-        // Populate the table rows
-        for ($index = 0; $index < count($data['incident_id']); $index++) {
-            
-            echo "<tr>";
-            echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "'>" . $data['incident_id'][$index] . "</a></td>";
-            echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "'>" . $data['incident_title'][$index] . "</a></td>";
-            echo "<td>" . $data['incident_content'][$index] . "</td>";
-            echo "<td>" . $data['incident_date'][$index] . "</td>";
-            echo "<td>" . $data['assignee_name'][$index] . "</td>";
-            echo "<td>" . $glpibrain->getIncidentStatus($data['incident_status'][$index]) . "</td>";
-            echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index],$data['category_id'][$index]) . "</td>";
-            echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
-            #Add a button that displays a pop up window with a form to add a real solution and button to submit the form
-            echo "<td><button onclick='RealSol()'>Add Solution</button>";
-            echo "</td>";
-            echo "</tr>";
-        }
-
-        echo "</tbody>";
-        echo "</table>";
-        echo "</div>";
+ 
+}
 
 // Register the display function to be called by GLPI
-if (Session::getCurrentInterface() == 'central') {
+if (Session::getCurrentInterface() == 'helpdesk') {
     Html::footer();
- } else {
+} else {
     Html::helpFooter();
- }
+}

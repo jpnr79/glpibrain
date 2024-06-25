@@ -36,6 +36,9 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
+include('../vendor/autoload.php');
+
+
 
 // Avoid direct access to the file
 if (!defined('GLPI_ROOT')) {
@@ -94,7 +97,8 @@ class Glpibrain extends CommonDBTM
       $query = "SELECT ticket.id AS incident_id, ticket.name AS incident_title, ticket.date_creation AS incident_date, u.name AS assignee_name, ticket.status AS incident_status, IFNULL(ticket.itilcategories_id, 0) AS category_id, ticket.content AS incident_content
                   FROM glpi_tickets ticket
                   JOIN glpi_tickets_users tu ON ticket.id = tu.tickets_id AND tu.type = 2
-                  JOIN glpi_users u ON tu.users_id = u.id";
+                  JOIN glpi_users u ON tu.users_id = u.id
+                  WHERE ticket.is_deleted = 0";
 
       $data = $DB->request($query);
       if ($data) {
@@ -161,11 +165,11 @@ class Glpibrain extends CommonDBTM
       // Fetch the ticket data from glpi database
       if ($id) {
          global $DB;
-         $query = "SELECT ticket.id AS incident_id, ticket.name AS incident_title, ticket.date_creation AS incident_date, u.name AS assignee_name, ticket.status AS incident_status, IFNULL(ticket.itilcategories_id, 0) AS category_id, ticket.content AS incident_content
+         $query = "SELECT ticket.id AS incident_id, ticket.name AS incident_title, ticket.date_creation AS incident_date, u.name AS assignee_name, ticket.status AS incident_status, IFNULL(ticket.itilcategories_id, 0) AS category_id, ticket.content AS incident_content, ticket.is_deleted AS incident_deleted
                 FROM glpi_tickets ticket
                 JOIN glpi_tickets_users tu ON ticket.id = tu.tickets_id AND tu.type = 2
                 JOIN glpi_users u ON tu.users_id = u.id
-                WHERE ticket.id = $id";
+                WHERE ticket.id = $id AND ticket.is_deleted = 0";
 
          $data = $DB->request($query);
          $dataArray = [];
@@ -231,7 +235,6 @@ class Glpibrain extends CommonDBTM
             "format": "json",
             "stream": false
             }';
-      try {
          $response = file_get_contents($url, false, stream_context_create([
             'http' => [
                'method' => 'POST',
@@ -239,20 +242,16 @@ class Glpibrain extends CommonDBTM
                'content' => $data
             ]
          ]));
-      } catch (Exception $e) {
-         #if the container is not running, it gives the error code 2 and we need to start the container
-         if ($e->getCode() == 2) {
-            $output = shell_exec('docker start ollama');
+         if($response == "") {
+            shell_exec('docker start ollama');
             $output = shell_exec('docker exec -it ollama ollama run llama3');
-            return $output;
          }
-      }
 
       $classification = json_decode($response, true);
       $f_category = str_replace(['{', '}', '"','\n', '\t', '[', ']'], '', $classification['response']);
       #update the category for the incident
       global $DB;
-      $query_create = "INSERT INTO glpi_itilcategories (name) VALUES ('$f_category')";
+      $query_create = "INSERT INTO glpi_itilcategories (name, `completename`, `comment`, level, code, `ancestors_cache`, date_mod, date_creation) VALUES ('$f_category', '$f_category', '', '1', '', '[]', NOW(), NOW())";
       $query_update = "UPDATE glpi_tickets SET itilcategories_id = (SELECT id FROM glpi_itilcategories WHERE name = '$f_category') WHERE id = $id";
       $DB->query($query_create);
       $DB->query($query_update);
@@ -300,6 +299,45 @@ class Glpibrain extends CommonDBTM
             "format": "json",
             "stream": false
             }';
+         $response = file_get_contents($url, false, stream_context_create([
+            'http' => [
+               'method' => 'POST',
+               'header' => 'Content-Type: application/json',
+               'content' => $data
+            ]
+         ]));
+         if($response == "") {
+            shell_exec('docker start ollama');
+            $output = shell_exec('docker exec -it ollama ollama run llama3');
+         
+         }
+
+      $solution = json_decode($response, true);
+      $f_solution = str_replace(['{', '}', '"','\n', '\t', '[', ']'], '', $solution['response']);
+      #update the solution for the incident
+      global $DB;
+
+      $query_create = "INSERT INTO glpibrain_solutions (ticket_id, `solution`) VALUES ($id, '$f_solution')";
+      $DB->query($query_create);
+      return $f_solution;
+   }
+
+   /**
+    * This function tells llama3 if the solution is wrong to get it retrained
+    * @param string $real_solution
+    * @param int $id                                                  
+    */
+
+   public function retrainSolution($real_solution, $id)
+   {
+      $incident = $this->getIncident($id);
+      $url = "http://localhost:11434/api/generate";
+      $data = '{
+            "model": "llama3",
+            "prompt": "The solution for this incident: ' . $incident['incident_content'] . ' is wrong, the correct solution is: ' . $real_solution . ' please keep it in mind for next time.",
+            "format": "json",
+            "stream": false
+            }';
       try {
          $response = file_get_contents($url, false, stream_context_create([
             'http' => [
@@ -309,11 +347,10 @@ class Glpibrain extends CommonDBTM
             ]
          ]));
       } catch (Exception $e) {
-         #if the container is nophp running, it gives the error code 2 and we need to start the container
+         #if the container is not running, it gives the error code 2 and we need to start the container
          if ($e->getCode() == 2) {
             $output = shell_exec('docker start ollama');
             $output = shell_exec('docker exec -it ollama ollama run llama3');
-            return $output;
          }
       }
 
@@ -322,7 +359,7 @@ class Glpibrain extends CommonDBTM
       #update the solution for the incident
       global $DB;
 
-      $query_create = "INSERT INTO glpibrain_solutions (ticket_id, `solution`) VALUES ($id, '$f_solution')";
+      $query_create = "UPDATE glpibrain_solutions SET `solution` = '$f_solution' WHERE ticket_id = $id";
       $DB->query($query_create);
       return $f_solution;
    }

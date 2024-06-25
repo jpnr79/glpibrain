@@ -9,7 +9,8 @@
         "rindow/rindow-clblast-ffi": "^1.0",
         "rindow/rindow-math-matrix": "^2.0.4",
         "rindow/rindow-math-matrix-matlibffi": "^1.0",
-        "rindow/rindow-neuralnetworks": "^2.1"
+        "rindow/rindow-neuralnetworks": "^2.1",
+        "sabre/event": "^5"
     },
     "require-dev": {
         "glpi-project/tools": "^0.4",
