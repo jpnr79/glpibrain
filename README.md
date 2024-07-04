@@ -1,6 +1,15 @@
 # GLPIBrain GLPI plugin
 
-Add your plugin description here.
+# GLPI Brain
+
+Proyecto para TFG.
+
+Extensión para el sistema de gestión de TI de código libre GLPI, basado en un sistema de redes neuronales que permite clasificar incidencias, identificar patrones y recomendar/automatizar soluciones.
+
+## Authors
+
+- [@nselar](https://www.github.com/nselar)
+- [@cmestre](https://www.github.com/cmestre)
 
 ## Contributing
 
