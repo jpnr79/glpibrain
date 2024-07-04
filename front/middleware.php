@@ -1,4 +1,5 @@
 <?php
+
 /**
  * -------------------------------------------------------------------------
  * GLPIBrain plugin for GLPI
@@ -26,35 +27,55 @@
  * @link      https://github.com/pluginsGLPI/glpibrain
  * -------------------------------------------------------------------------
  */
+
+//This file is used by the javascript code to call php functions using AJAX
+// Reference necessary classes
 include('../../../inc/includes.php');
 
-header('Content-Type: application/json');
+//This gives this error CSRF check failed for User ID: 2 at /glpi/plugins/glpibrain/front/middleware.php, solve it
+//https://forum.glpi-project.org/viewtopic.php?id=283613
 
-$aResult= array();
+ $glpibrain = new GlpiBrain();
 
-$glpibrain = new Glpibrain();
+"
+This is the post request made in javascript
+$.ajax({
+            method: 'POST',
+            url: 'middleware.php',
+            dataType: 'json',
+            data: {
+                'action': 'retrainSolution',
+                'arguments': [form.value, id.toString()]
+            },
+";
 
-if (!isset($_POST['functionname'])) {
-    $aResult['error'] = 'No function name!';
-}
+// Check if the action is retrainSolution
 
-if (!isset($_POST['arguments'])) {
-    $aResult['error'] = 'No function arguments!';
-}
-
-if (!isset($aResult['error'])) {
-    switch ($_POST['functionname']) {
-        case 'retrainSolution':
-            if (!is_array($_POST['arguments']) || (count($_POST['arguments']) < 2)) {
-                $aResult['error'] = 'Error in arguments!';
-            } else {
-                $aResult['result'] = $glpibrain->retrainSolution($_POST['arguments'][0], $_POST['arguments'][1]);
-            }
-            break;
-
-        default:
-            $aResult['error'] = 'Not found function ' . $_POST['functionname'] . '!';
-            break;
+if (isset($_POST['action']) && $_POST['action'] == 'retrainSolution') {
+    // Check if the user has the right to retrain the solution
+    
+    // Check if the arguments are set
+    if (!isset($_POST['arguments'])) {
+        echo "Arguments not set";
+        exit();
     }
+    // Check if the arguments are an array
+    if (!is_array($_POST['arguments'])) {
+        echo "Arguments are not an array";
+        exit();
+    }
+    // Check if the arguments are of the correct length
+    if (count($_POST['arguments']) != 2) {
+        echo "Incorrect number of arguments";
+        exit();
+    }
+    // Check if the arguments are of the correct type
+    if (!is_string($_POST['arguments'][0]) || !is_string($_POST['arguments'][1])) {
+        echo "Incorrect argument type";
+        exit();
+    }
+    // Call the retrainSolution function
+    $glpibrain->retrainSolution($_POST['arguments'][0], $_POST['arguments'][1]);
+    echo "Solution retrained";
+    exit();
 }
-echo json_encode($aResult);

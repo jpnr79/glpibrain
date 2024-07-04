@@ -32,11 +32,10 @@
 // Reference necessary classes 
 include('../../../inc/includes.php');
 
-use Glpi\Dashboard\Dashboard;
-
 //Session::checkRight('plugin_glpibrain', READ);
 
 Html::header(__('GLPIBrain Plugin'), $_SERVER['PHP_SELF'], "plugins", "GLPIBrain");
+
 echo "<div class='center'>";
 echo "<link rel='stylesheet' type='text/css' href='css/incident_table.css'>";
 echo "<h1>" . __('Incidents table') . "</h1>";
@@ -76,9 +75,12 @@ if (empty($data)) {
     echo "<td><input type='text' id='searchInput' onkeyup='searchonTable(3)' onchange='searchonTable(3)' placeholder='Search by assignee..'></td>";
     echo "<td><select id='searchSelect' onchange='searchonTable(4)'>
             <option value=''>" . __('All') . "</option>
-            <option value='1'>" . __('Open') . "</option>
-            <option value='2'>" . __('Closed') . "</option>
+            <option value='1'>" . __('Processing (Assigned)') . "</option>
+            <option value='2'>" . __('Processing (Planned)') . "</option>
             <option value='3'>" . __('Pending') . "</option>
+            <option value='4'>" . __('Solved') . "</option>
+            <option value='5'>" . __('Closed') . "</option>
+            <option value='6'>" . __('Unknown') . "</option>
             </select></td>";
     echo "<td><input type='text' id='searchInput' onkeyup='searchonTable(5)' placeholder='Search by category..'></td>";
     echo "</tr>";
@@ -97,16 +99,16 @@ if (empty($data)) {
         echo "<td>" . $glpibrain->getIncidentStatus($data['incident_status'][$index]) . "</td>";
         echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index], $data['category_id'][$index]) . "</td>";
         echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
-        #the button executes openWindow and send as arguments the incident_id and the incident_content
-        echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ", \"" . $data['incident_content'][$index] . "\")'>" . __('Add') . "</button></td>";
+        #the button executes openWindow and send as arguments the incident_id, the incident content and, hidden, the csrf token
+        echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ", \"" . $data['incident_content'][$index] . "\", \"" . Session::getNewCSRFToken() . "\")'>" . __('Retrain') . "</button></td>";
         echo "</td>";
         echo "</tr>";
+        Html::closeform();
     }
 
     echo "</tbody>";
     echo "</table>";
     echo "</div>";
-
  
 }
 

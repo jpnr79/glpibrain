@@ -1,3 +1,5 @@
+
+
 function searchonTable(col) {
     var input, filter, table, tr, td, i, txtValue;
     input = document.getElementById('searchInput');
@@ -11,11 +13,11 @@ function searchonTable(col) {
             if (txtValue.toUpperCase().includes(filter)) {
                 //If no match show no results found
                 tr[i].style.display = '';
-                
+
             } else {
                 tr[i].style.display = 'none';
             }
-        } 
+        }
     }
 }
 
@@ -32,11 +34,11 @@ function filterTable(column_number) {
             if (txtValue.toUpperCase().includes(filter)) {
                 //If no match show no results found
                 tr[i].style.display = '';
-                
+
             } else {
                 tr[i].style.display = 'none';
             }
-        } 
+        }
     }
 
 }
@@ -44,7 +46,8 @@ function filterTable(column_number) {
 function hello() {
     alert('Hello World!');
 }
-function openWindow(id, details) {
+
+function openWindow(id, details, token) {
     //Create a div block over the screen which size adjustes dynamically, also append a title to this div window 
     //First obscure the screen
     var div1 = document.createElement('div');
@@ -81,18 +84,28 @@ function openWindow(id, details) {
     content.style.textAlign = 'center';
     content.innerHTML = id + ' - ' + details;
     div2.appendChild(content);
-    //Now the form to submit the real solution (needs to call to a function on php)
-    var form = document.createElement('textarea');
+    var form = document.createElement('form');
     form.style.width = '80%';
-    form.style.height = '100px';
     form.style.margin = '10px';
-    form.style.display = 'block';
-    //center it
     form.style.marginLeft = 'auto';
     form.style.marginRight = 'auto';
-    form.placeholder = 'Write the solution here';
+    form.style.display = 'block';
+    var textarea = document.createElement('textarea');
+    textarea.style.width = '100%';
+    textarea.style.height = '200px';
+    textarea.style.margin = '10px';
+    textarea.style.display = 'block';
+    if(textarea.value == ''){
+        textarea.setCustomValidity('Please enter a solution');
+    } else {
+        textarea.setCustomValidity('');
+    }
+    form.appendChild(textarea);
     div2.appendChild(form);
     var submit = document.createElement('button');
+    while(textarea.value == ''){
+        submit.disabled = true;
+    }
     submit.innerHTML = 'Submit';
     submit.style.width = '80%';
     submit.style.margin = '10px';
@@ -100,26 +113,28 @@ function openWindow(id, details) {
     submit.style.marginRight = 'auto';
     submit.style.display = 'block';
     div2.appendChild(submit);
-    submit.onclick = function() {
-        //Here the function to send the solution to the database
-        //Execute a function from php using jquery and ajax
+    submit.onclick = function () {
         $.ajax({
-            type: 'POST',
+            method: 'POST',
             url: 'middleware.php',
-            dataType: 'json',
-            data: {functionname: 'retrainSolution', arguments: [form.value, id]},
+            dataType: 'Json',
+            //add {% csrf_token %}
+            data: {
+                '_glpi_csrf_token': token,
+                'action': 'retrainSolution',
+                'arguments': [id, textarea.value]
+            },
+            //Alert the error if there is one
+            error: function (error) {
+                alert('Error: ' + error['responseText']);
+            },
+            //If successfull alert the user
+            success: function (response) {
+                alert(response['message']);
+            }
+            
+        })
 
-            success: function (obj) {
-                //if there is no error alert the result
-                //cannot use in 
-                            if( !(obj.includes('error')) ) {
-                                alert(obj.result);
-                            }
-                            else {
-                                alert(obj.error);
-                            }
-                        }
-        });
         document.body.removeChild(div1);
         document.body.removeChild(div2);
     }
@@ -130,11 +145,11 @@ function openWindow(id, details) {
     button.style.top = '10px';
     button.style.right = '10px';
     //on button hover change the color and cursor style
-    button.onmouseover = function() {
+    button.onmouseover = function () {
         button.style.color = 'red';
         button.style.cursor = 'pointer';
     }
-    button.onclick = function() {
+    button.onclick = function () {
         document.body.removeChild(div1);
         document.body.removeChild(div2);
     }
@@ -160,7 +175,7 @@ function showDetail(content) {
     //bubble.style.zIndex = '1001';
     bubble.innerHTML = content;
     document.body.appendChild(bubble);
-    bubble.onmouseleave = function() {
+    bubble.onmouseleave = function () {
         document.body.removeChild(bubble);
     }
 
