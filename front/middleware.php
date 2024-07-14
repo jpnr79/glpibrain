@@ -35,7 +35,7 @@ include('../../../inc/includes.php');
 //This gives this error CSRF check failed for User ID: 2 at /glpi/plugins/glpibrain/front/middleware.php, solve it
 //https://forum.glpi-project.org/viewtopic.php?id=283613
 
- $glpibrain = new GlpiBrain();
+$glpibrain = new GlpiBrain();
 
 "
 This is the post request made in javascript
@@ -53,7 +53,7 @@ $.ajax({
 
 if (isset($_POST['action']) && $_POST['action'] == 'retrainSolution') {
     // Check if the user has the right to retrain the solution
-    
+
     // Check if the arguments are set
     if (!isset($_POST['arguments'])) {
         echo "Arguments not set";
@@ -76,6 +76,6 @@ if (isset($_POST['action']) && $_POST['action'] == 'retrainSolution') {
     }
     // Call the retrainSolution function
     $glpibrain->retrainSolution($_POST['arguments'][0], $_POST['arguments'][1]);
-    echo "Solution retrained";
+    echo json_encode(['status' => 'success']);
     exit();
 }

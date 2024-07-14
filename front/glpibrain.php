@@ -42,6 +42,7 @@ echo "<h1>" . __('Incidents table') . "</h1>";
 // Create the searchTable function
 echo "<script type='text/javascript' src='js/incident_table.js'></script>";
 
+$glpibrain = new Glpibrain();
 
 // Display the table
 echo "<table id=incidentTable class='tab_cadre_fixes'>";
@@ -60,61 +61,63 @@ echo "</thead>";
 echo "<tbody>";
 
 // Create a new instance of the Glpibrain class and get the incidents
-$glpibrain = new Glpibrain();
+
 $data = $glpibrain->getIncidents();
 
+
+
 if (empty($data)) {
-    echo "<tr>";
-    echo "<td colspan='8'>" . __('No incidents found') . "</td>";
-    echo "</tr>";
+  echo "<tr>";
+  echo "<td colspan='8'>" . __('No incidents found') . "</td>";
+  echo "</tr>";
 } else {
-    echo "<tr>";
-    echo "<td><input type='number' id='searchInput' onkeyup='searchonTable(0)' onchange='searchonTable(0)' placeholder='Search by id..'></td>";
-    echo "<td><input type='text' id='searchInput' onkeyup='searchonTable(1)' onchange='searchonTable(1)' placeholder='Search by title..'></td>";
-    echo "<td><input type='date' id='searchInput' onkeyup='searchonTable(2)' onchange='searchonTable(2)' placeholder='Search by date..'></td>";
-    echo "<td><input type='text' id='searchInput' onkeyup='searchonTable(3)' onchange='searchonTable(3)' placeholder='Search by assignee..'></td>";
-    echo "<td><select id='searchSelect' onchange='searchonTable(4)'>
+  echo "<tr class='filters'>";
+  echo "<th><input type='number' id='searchById' onkeyup='searchonTableId()' onchange='searchonTableId()' placeholder='Id..'></th>";
+  echo "<th><input type='text' id='searchByTitle' onkeyup='searchonTableTitle()' onchange='searchonTableTitle()' placeholder='Title..'></th>";
+  echo "<th><input type='date' id='searchByDate' onkeyup='searchonTableDate()' onchange='searchonTableDate()' placeholder='Date..'></th>";
+  echo "<th><input type='text' id='searchByAsignee' onkeyup='searchonTableAsignee()' onchange='searchonTableAsignee()' placeholder='Assignee..'></th>";
+  echo "<th><select id='searchByStatus' onchange='searchonTableStatus()'>
             <option value=''>" . __('All') . "</option>
-            <option value='1'>" . __('Processing (Assigned)') . "</option>
-            <option value='2'>" . __('Processing (Planned)') . "</option>
-            <option value='3'>" . __('Pending') . "</option>
-            <option value='4'>" . __('Solved') . "</option>
-            <option value='5'>" . __('Closed') . "</option>
-            <option value='6'>" . __('Unknown') . "</option>
+            <option value='Processing (Assigned)'>" . __('Processing (Assigned)') . "</option>
+            <option value='Processing (Planned)'>" . __('Processing (Planned)') . "</option>
+            <option value='Pending'>" . __('Pending') . "</option>
+            <option value='Solved'>" . __('Solved') . "</option>
+            <option value='Closed'>" . __('Closed') . "</option>
+            <option value='Unknown'>" . __('Unknown') . "</option>
             </select></td>";
-    echo "<td><input type='text' id='searchInput' onkeyup='searchonTable(5)' placeholder='Search by category..'></td>";
-    echo "</tr>";
+  echo "<th><input type='text' id='searchByCategory' onkeyup='searchonTableCategory()' placeholder='Category..'></th>";
+  echo "</tr>";
 
-    // Populate the table rows
-    for ($index = 0; $index < count($data['incident_id']); $index++) {
-        echo "<tr>";
+  // Populate the table rows
+  for ($index = 0; $index < count($data['incident_id']); $index++) {
+    echo "<tr>";
 
-        #Add a link to the ticket on hover show the incident_content in a box
-        echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "'>" . $data['incident_id'][$index] . "</a></td>";
-        echo "<td> 
+    #Add a link to the ticket on hover show the incident_content in a box
+    echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "'>" . $data['incident_id'][$index] . "</a></td>";
+    echo "<td> 
                 <a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "' onmouseover='showDetail(\"" . $data['incident_content'][$index] . "\")' onmouseleave=closeDiv()>" . $data['incident_title'][$index] . "</a>
           </td>";
-        echo "<td>" . $data['incident_date'][$index] . "</td>";
-        echo "<td>" . $data['assignee_name'][$index] . "</td>";
-        echo "<td>" . $glpibrain->getIncidentStatus($data['incident_status'][$index]) . "</td>";
-        echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index], $data['category_id'][$index]) . "</td>";
-        echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
-        #the button executes openWindow and send as arguments the incident_id, the incident content and, hidden, the csrf token
-        echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ", \"" . $data['incident_content'][$index] . "\", \"" . Session::getNewCSRFToken() . "\")'>" . __('Retrain') . "</button></td>";
-        echo "</td>";
-        echo "</tr>";
-        Html::closeform();
-    }
+    echo "<td>" . $data['incident_date'][$index] . "</td>";
+    echo "<td>" . $data['assignee_name'][$index] . "</td>";
+    //if php gives warning show loading from javascript
+    echo "<td>" . $glpibrain->getIncidentStatus($data['incident_status'][$index]) . "</td>";
+    echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index], $data['category_id'][$index]) . "</td>";
+    echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
+    #the button executes openWindow and send as arguments the incident_id, the incident content and, hidden, the csrf token
+    echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ", \"" . $data['incident_content'][$index] . "\", \"" . Session::getNewCSRFToken() . "\")'>" . __('Add') . "</button></td>";
+    echo "</td>";
+    echo "</tr>";
+    Html::closeform();
+  }
 
-    echo "</tbody>";
-    echo "</table>";
-    echo "</div>";
- 
+  echo "</tbody>";
+  echo "</table>";
+  echo "</div>";
 }
 
 // Register the display function to be called by GLPI
 if (Session::getCurrentInterface() == 'helpdesk') {
-    Html::footer();
+  Html::footer();
 } else {
-    Html::helpFooter();
+  Html::helpFooter();
 }

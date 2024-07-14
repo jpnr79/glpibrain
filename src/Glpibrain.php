@@ -218,6 +218,28 @@ class Glpibrain extends CommonDBTM
       }
    }
 
+   private function startOllama()
+   {
+      $output = shell_exec('docker start ollama');
+      shell_exec('docker exec -it ollama ollama run llama3');
+      while (str_contains("LISTEN", "") !== false) {
+         return true;
+      }
+      sleep(10);
+   }
+
+   public function getOllamaStatus()
+   {
+      // check if something is running over port 11434
+      $output = shell_exec("netstat -tulpn | grep ':11434'");
+      if (str_contains("LISTEN", "") !== false) {
+         return true;
+      } else {
+         $this->startOllama();
+         return false;
+      }
+   }
+
    /**
     * This function retrieves the incident data from the database and process it using ollama to get the classification, then this is saved 
     * @param int $id
@@ -226,47 +248,46 @@ class Glpibrain extends CommonDBTM
 
    private function classifyIncident($id)
    {
+      while ($this->getOllamaStatus() == false) {
+         echo "Loading...";
+         $this->startOllama();
+      }
       $incident = $this->getIncident($id);
       $content = $incident['incident_content'];
+      $content = str_replace(['&#60;p&#62;', '&#60;/p&#62;', '"'], '', $content);
       $url = "http://localhost:11434/api/generate";
       $data = '{
-            "model": "llama3",
-            "prompt": "Provide just the word to define the classification of this incident ' . $content . '",
-            "format": "json",
-            "stream": false
-            }';
-      try {
-         $response = file_get_contents($url, false, stream_context_create([
-            'http' => [
-               'method' => 'POST',
-               'header' => 'Content-Type: application/json',
-               'content' => $data
-            ]
-            ]));
-         if ($response == "") {
-            throw new Exception("The container is not running, reload the page", 2);
-         }
-      } catch (Exception $e) {
-            if($e->getCode() == 2) {
-               shell_exec('docker start ollama');
-               shell_exec('docker exec -it ollama ollama run llama3');
-            }
-         if($response == "") {
-            //shell_exec('docker start ollama');
-            //$output = shell_exec('docker exec -it ollama ollama run llama3');
+         "model": "llama3",
+         "prompt": "Classify this incident, answer as you were an IT technician: ' . $content . '",
+         "format": "json",
+         "stream": false
+       }';
+      $ch = curl_init();
+
+      curl_setopt($ch, CURLOPT_URL, $url);
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+      $response = curl_exec($ch);
+      if ($response == "") {
+         trigger_error("Error: Start the ollama server and refresh the page");
+      } else {
+         $classification = json_decode($response, true);
+         $f_category = str_replace(['{', '}', '"', '\n', '\t', '[', ']', ')'], '', $classification['response']);
+         #update the category for the incident
+         global $DB;
+         if ($f_category == "") {
+            $f_category = "Unknown";
          } else {
-            $classification = json_decode($response, true);
-            $f_category = str_replace(['{', '}', '"','\n', '\t', '[', ']'], '', $classification['response']);
-            #update the category for the incident
-            global $DB;
             $query_create = "INSERT INTO glpi_itilcategories (name, `completename`, `comment`, level, code, `ancestors_cache`, date_mod, date_creation) VALUES ('$f_category', '$f_category', '', '1', '', '[]', NOW(), NOW())";
             $query_update = "UPDATE glpi_tickets SET itilcategories_id = (SELECT id FROM glpi_itilcategories WHERE name = '$f_category') WHERE id = $id";
             $DB->query($query_create);
             $DB->query($query_update);
-            return $f_category;
          }
+         return $f_category;
+      }
    }
-}
 
    /**
     * This function retrieves the incident data from the database and process it using ollama to get a possible solution if it isn't already solved then this is saved to database
@@ -292,6 +313,11 @@ class Glpibrain extends CommonDBTM
       }
    }
 
+   private function ErrorHandler($errno, $errstr, $errfile, $errline)
+   {
+      echo "Error: [$errno] $errstr";
+   }
+
    /**
     * This function retrieves the incident data from the database and process it using ollama to get a possible solution then this is saved to database
     * @param int $id
@@ -302,41 +328,42 @@ class Glpibrain extends CommonDBTM
    {
       $incident = $this->getIncident($id);
       $content = $incident['incident_content'];
+      $content = str_replace(['&#60;p&#62;', '&#60;/p&#62;', '"'], '', $content);
+      while ($this->getOllamaStatus() == false) {
+         echo "Loading...";
+         $this->startOllama();
+      }
       $url = "http://localhost:11434/api/generate";
       $data = '{
-            "model": "llama3",
-            "prompt": "Provide in a few words troubleshooting for this: ' . $content . '",
-            "format": "json",
-            "stream": false
-            }';
-         try {
-            $response = file_get_contents($url, false, stream_context_create([
-               'http' => [
-                  'method' => 'POST',
-                  'header' => 'Content-Type: application/json',
-                  'content' => $data
-               ]
-            ]));
-         } catch (Exception $e) {
-            #if the container is not running, it gives the error code 2 and we need to start the container
-            throw new Exception("The container is not running, reload the page", 2);
-               shell_exec('docker start ollama');
-               shell_exec('docker exec -it ollama ollama run llama3');
-         }
-         //PHP throws error code 2 when making a petition and the container isnt started. So we need to start the container and wait until the model is started to make the petition and get the response
-         if($response == "") {
-            //shell_exec('docker start ollama');
-            //$output = shell_exec('docker exec -it ollama ollama run llama3');
-         } else {
-            $solution = json_decode($response, true);
-            $f_solution = str_replace(['{', '}', '"','\n', '\t', '[', ']'], '', $solution['response']);
-            #update the solution for the incident
-            global $DB;
+         "model": "llama3",
+         "prompt": "Solve this incident, answer as you were an IT technician: ' . $content . '",
+         "format": "json",
+         "stream": false
+       }';
+      $ch = curl_init();
 
+      curl_setopt($ch, CURLOPT_URL, $url);
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+      $response = curl_exec($ch);
+      //PHP throws error code 2 when making a petition and the container isnt started. So we need to start the container and wait until the model is started to make the petition and get the response
+      if ($response == "") {
+         trigger_error("Error: Start the ollama server and refresh the page");
+      } else {
+         $solution = json_decode($response, true);
+         $f_solution = str_replace(['{', '}', '"', '\n', '\t', '[', ']'], '', $solution['response']);
+         #update the solution for the incident
+         if ($f_solution == "") {
+            $f_solution = "Unknown";
+         } else {
+            global $DB;
             $query_create = "INSERT INTO glpibrain_solutions (ticket_id, `solution`) VALUES ($id, '$f_solution')";
             $DB->query($query_create);
             return $f_solution;
          }
+      }
    }
 
    /**
@@ -348,28 +375,21 @@ class Glpibrain extends CommonDBTM
    public function retrainSolution($id, $real_solution)
    {
       $incident = $this->getIncident($id);
-      $url = "http://localhost:11434/api/chat";
+      $url = "http://localhost:11434/api/generate";
       $data = '{
             "model": "llama3",
             "prompt": "The solution for this incident: ' . $incident['incident_content'] . ' is wrong, the correct solution is: ' . $real_solution . ' please keep it in mind for next time.",
             "format": "json",
             "stream": false
             }';
-      try {
-         $response = file_get_contents($url, false, stream_context_create([
-            'http' => [
-               'method' => 'POST',
-               'header' => 'Content-Type: application/json',
-               'content' => $data
-            ]
-         ]));
-      } catch (Exception $e) {
-         #if the container is not running, it gives the error code 2 and we need to start the container
-         if ($e->getCode() == 2) {
-            $output = shell_exec('docker start ollama');
-            $output = shell_exec('docker exec -it ollama ollama run llama3');
-         }
-      }
+      $ch = curl_init();
+
+      curl_setopt($ch, CURLOPT_URL, $url);
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+      $response = curl_exec($ch);
 
       //$solution = json_decode($response, true);
       //$f_solution = str_replace(['{', '}', '"','\n', '\t', '[', ']'], '', $solution['response']);
@@ -377,7 +397,9 @@ class Glpibrain extends CommonDBTM
       global $DB;
 
       $query_create = "UPDATE glpibrain_solutions SET `solution` = '$real_solution' WHERE ticket_id = $id";
+      $query_update = "INSERT INTO glpi_itilsolutions (ticket_id, itemtype, items_id, `content`, date_creation, date_mod, users_id, users_id_editor, users_id_approval, status) VALUES $id, Ticket, 0, '&#60;p&#62;$real_solution&#60;/p&#62;', NOW(), NOW(), 2, 0, 0, 2";
       $DB->query($query_create);
+      $DB->query($query_update);
       return $real_solution;
    }
 }
