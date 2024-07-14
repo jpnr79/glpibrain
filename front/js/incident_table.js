@@ -201,7 +201,6 @@ function openWindow(id, details, token) {
       method: 'POST',
       url: 'middleware.php',
       dataType: 'Json',
-      //add {% csrf_token %}
       data: {
         '_glpi_csrf_token': token,
         'action': 'retrainSolution',

@@ -32,6 +32,8 @@
 // Reference necessary classes 
 include('../../../inc/includes.php');
 
+$forbidden_chars = ['&#60;p&#62;', '&#60;/p&#62;', '"', '=', '&#39;', '&#145;', '&#146;', '&#8216', '&#8217', '&#8220', '&#8221', '&#34;', '" ', '="" ', '."'];
+
 //Session::checkRight('plugin_glpibrain', READ);
 
 Html::header(__('GLPIBrain Plugin'), $_SERVER['PHP_SELF'], "plugins", "GLPIBrain");
@@ -95,7 +97,7 @@ if (empty($data)) {
     #Add a link to the ticket on hover show the incident_content in a box
     echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "'>" . $data['incident_id'][$index] . "</a></td>";
     echo "<td> 
-                <a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "' onmouseover='showDetail(\"" . $data['incident_content'][$index] . "\")' onmouseleave=closeDiv()>" . $data['incident_title'][$index] . "</a>
+                <a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "' onmouseover='showDetail(\"" . str_replace($forbidden_chars, '' ,$data['incident_content'][$index]) . "\")' onmouseleave=closeDiv()>" . $data['incident_title'][$index] . "</a>
           </td>";
     echo "<td>" . $data['incident_date'][$index] . "</td>";
     echo "<td>" . $data['assignee_name'][$index] . "</td>";
@@ -104,7 +106,7 @@ if (empty($data)) {
     echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index], $data['category_id'][$index]) . "</td>";
     echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
     #the button executes openWindow and send as arguments the incident_id, the incident content and, hidden, the csrf token
-    echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ", \"" . $data['incident_content'][$index] . "\", \"" . Session::getNewCSRFToken() . "\")'>" . __('Add') . "</button></td>";
+    echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ",\"" . str_replace($forbidden_chars, '' ,$data['incident_content'][$index]) . "\",\"" . Session::getNewCSRFToken() . "\")'>" . __('Add') . "</button></td>";
     echo "</td>";
     echo "</tr>";
     Html::closeform();
