@@ -1,14 +1,14 @@
 h1 {
     text-align: center;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 1%;
 }
 
 table {
     width: 100%;
-    margin-top: 20px;
+    margin-top: 1%;
     text-align: center;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    table-layout: fixed;
 }
 
 th {
@@ -16,6 +16,7 @@ th {
     color: black;
     font-size: 100%;
     text-align: center;
+    
 }
 
 tbody {
@@ -23,6 +24,7 @@ tbody {
 }
 
 tr {
+    padding: auto;
     background-color: white;
     list-style: disc;
     text-align: center;
@@ -33,8 +35,8 @@ tr:nth-child(odd) {
 }
 
 td {
-    padding: 10px;
     text-align: center;
+    border: 1px solid rgb(180, 180, 180);
 }
 
 th input {
@@ -49,9 +51,9 @@ th select {
 }
 
 td button {
-    width: 100%;
-    padding: 5px;
+    width: 20%;
     text-align: center;
+    border-radius: 5px;
 }
 
 p {

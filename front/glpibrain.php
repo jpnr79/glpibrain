@@ -34,14 +34,16 @@ include('../../../inc/includes.php');
 
 $forbidden_chars = ['&#60;p&#62;', '&#60;/p&#62;', '"', '=', '&#39;', '&#145;', '&#146;', '&#8216', '&#8217', '&#8220', '&#8221', '&#34;', '" ', '="" ', '."'];
 
+//$dashboard = new Dashboard();
 //Session::checkRight('plugin_glpibrain', READ);
 
 Html::header(__('GLPIBrain Plugin'), $_SERVER['PHP_SELF'], "plugins", "GLPIBrain");
 
 echo "<div class='center'>";
 echo "<link rel='stylesheet' type='text/css' href='css/incident_table.css'>";
+//New glpi dasboard
+//echo $dashboard->showDashboard();
 echo "<h1>" . __('Incidents table') . "</h1>";
-// Create the searchTable function
 echo "<script type='text/javascript' src='js/incident_table.js'></script>";
 
 $glpibrain = new Glpibrain();
@@ -64,10 +66,15 @@ echo "<tbody>";
 
 // Create a new instance of the Glpibrain class and get the incidents
 
-$data = $glpibrain->getIncidents();
-
-
-
+switch($glpibrain->getOllamaStatus())
+{
+  case false:
+    echo "<tr>";
+    echo "<td colspan='8'>" . __('Ollama is not running') . "</td>";
+    echo "</tr>";
+    break;
+  case true:
+  $data = $glpibrain->getIncidents();
 if (empty($data)) {
   echo "<tr>";
   echo "<td colspan='8'>" . __('No incidents found') . "</td>";
@@ -106,7 +113,7 @@ if (empty($data)) {
     echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index], $data['category_id'][$index]) . "</td>";
     echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
     #the button executes openWindow and send as arguments the incident_id, the incident content and, hidden, the csrf token
-    echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ",\"" . str_replace($forbidden_chars, '' ,$data['incident_content'][$index]) . "\",\"" . Session::getNewCSRFToken() . "\")'>" . __('Add') . "</button></td>";
+    echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ",\"" . str_replace($forbidden_chars, '' ,$data['incident_content'][$index]) . "\",\"" . Session::getNewCSRFToken() . "\")'>" . __('+') . "</button></td>";
     echo "</td>";
     echo "</tr>";
     Html::closeform();
@@ -115,6 +122,7 @@ if (empty($data)) {
   echo "</tbody>";
   echo "</table>";
   echo "</div>";
+}
 }
 
 // Register the display function to be called by GLPI
