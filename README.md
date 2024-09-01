@@ -4,7 +4,9 @@
 
 Proyecto para TFG.
 
-Extensión para el sistema de gestión de TI de código libre GLPI, basado en un sistema de redes neuronales que permite clasificar incidencias, identificar patrones y recomendar/automatizar soluciones.
+Extensión para el sistema de gestión de TI de código libre GLPI, basado en un sistema de redes neuronales que permite clasificar incidencias, identificar patrones y recomendar soluciones.
+
+Para la instalación del plugin, descomprimir el zip generado por github en el directorio de plugins de GLPI, ejemplo /var/www/html/glpi/plugins y activarlo desde la interfaz de usuario.
 
 ## Authors
 
@@ -18,5 +20,3 @@ Extensión para el sistema de gestión de TI de código libre GLPI, basado en un
 * Refer to [GitFlow](http://git-flow.readthedocs.io/) process for branching
 * Work on a new branch on your own fork
 * Open a PR that will be reviewed by a developer
-
-Needed to install rindow neural network with composer,and opencl libraries for gpu acceleration

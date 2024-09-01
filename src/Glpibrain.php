@@ -38,8 +38,6 @@ require __DIR__ . '/../vendor/autoload.php';
 
 include('../vendor/autoload.php');
 
-
-
 // Avoid direct access to the file
 if (!defined('GLPI_ROOT')) {
    die("You may not access this file directly");
@@ -78,7 +76,7 @@ class Glpibrain extends CommonDBTM
          Session::haveRight(static::$rightname, UPDATE)
          || Session::haveRight("config", UPDATE)
       ) {
-         $menu['icon']                                       = "ti ti-brain";
+         $menu['icon'] = "ti ti-brain";
       }
 
       return $menu;
@@ -93,7 +91,6 @@ class Glpibrain extends CommonDBTM
    {
       // Fetch the tickets data from glpi database
       global $DB;
-      // I need to create a procedure to get the incidents from the database with details like, id, name, date, assignee, category, status, expected solution, real solution
       $query = "SELECT ticket.id AS incident_id, ticket.name AS incident_title, ticket.date_creation AS incident_date, u.name AS assignee_name, ticket.status AS incident_status, IFNULL(ticket.itilcategories_id, 0) AS category_id, ticket.content AS incident_content
                   FROM glpi_tickets ticket
                   JOIN glpi_tickets_users tu ON ticket.id = tu.tickets_id AND tu.type = 2
@@ -127,31 +124,15 @@ class Glpibrain extends CommonDBTM
 
    public function getIncidentStatus($sid)
    {
-      switch ($sid) {
-         case 1:
-            $state = 'New';
-            break;
-         case 2:
-            $state = 'Processing (Assigned)';
-            break;
-         case 3:
-            $state = 'Processing (Planned)';
-            break;
-         case 4:
-            $state = 'Pending';
-            break;
-         case 5:
-            $state = 'Solved';
-            break;
-         case 6:
-            $state = 'Closed';
-            break;
-         default:
-            $state = 'Unknown';
-            break;
-      }
-
-      return $state;
+      $states = [
+         1 => 'New',
+         2 => 'Processing (Assigned)',
+         3 => 'Processing (Planned)',
+         4 => 'Pending',
+         5 => 'Solved',
+         6 => 'Closed'
+      ];
+      return $states[$sid] ?? 'Unknown';
    }
 
    /**
@@ -166,10 +147,10 @@ class Glpibrain extends CommonDBTM
       if ($id) {
          global $DB;
          $query = "SELECT ticket.id AS incident_id, ticket.name AS incident_title, ticket.date_creation AS incident_date, u.name AS assignee_name, ticket.status AS incident_status, IFNULL(ticket.itilcategories_id, 0) AS category_id, ticket.content AS incident_content, ticket.is_deleted AS incident_deleted
-                FROM glpi_tickets ticket
-                JOIN glpi_tickets_users tu ON ticket.id = tu.tickets_id AND tu.type = 2
-                JOIN glpi_users u ON tu.users_id = u.id
-                WHERE ticket.id = $id AND ticket.is_deleted = 0";
+                     FROM glpi_tickets ticket
+                     JOIN glpi_tickets_users tu ON ticket.id = tu.tickets_id AND tu.type = 2
+                     JOIN glpi_users u ON tu.users_id = u.id
+                     WHERE ticket.id = $id AND ticket.is_deleted = 0";
 
          $data = $DB->request($query);
          $dataArray = [];
@@ -280,8 +261,15 @@ class Glpibrain extends CommonDBTM
          if ($f_category == "") {
             $f_category = "Unknown";
          } else {
-            $query_create = "INSERT INTO glpi_itilcategories (name, `completename`, `comment`, level, code, `ancestors_cache`, date_mod, date_creation) VALUES ('$f_category', '$f_category', '', '1', '', '[]', NOW(), NOW())";
-            $query_update = "UPDATE glpi_tickets SET itilcategories_id = (SELECT id FROM glpi_itilcategories WHERE name = '$f_category') WHERE id = $id";
+            $query_create = "INSERT INTO glpi_itilcategories (
+                              name, `completename`, `comment`, level,
+                              code, `ancestors_cache`, date_mod, date_creation
+                              ) 
+                              VALUES 
+                              ('$f_category', '$f_category', '', '1', '', '[]', NOW(), NOW()
+                              )";
+            $query_update = "UPDATE glpi_tickets
+                               SET itilcategories_id = (SELECT id FROM glpi_itilcategories WHERE name = '$f_category') WHERE id = $id";
             $DB->query($query_create);
             $DB->query($query_update);
          }
@@ -348,18 +336,19 @@ class Glpibrain extends CommonDBTM
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
       $response = curl_exec($ch);
-      //PHP throws error code 2 when making a petition and the container isnt started. So we need to start the container and wait until the model is started to make the petition and get the response
       if ($response == "") {
          trigger_error("Error: Start the ollama server and refresh the page");
       } else {
          $solution = json_decode($response, true);
          $f_solution = str_replace(['{', '}', '"', '\n', '\t', '[', ']'], '', $solution['response']);
-         #update the solution for the incident
          if ($f_solution == "") {
             $f_solution = "Unknown";
          } else {
             global $DB;
-            $query_create = "INSERT INTO glpibrain_solutions (ticket_id, `solution`) VALUES ($id, '$f_solution')";
+            $query_create = "INSERT INTO glpibrain_solutions 
+                              (ticket_id, `solution`) 
+                              VALUES 
+                              ($id, '$f_solution')";
             $DB->query($query_create);
             return $f_solution;
          }
@@ -391,13 +380,14 @@ class Glpibrain extends CommonDBTM
 
       $response = curl_exec($ch);
 
-      //$solution = json_decode($response, true);
-      //$f_solution = str_replace(['{', '}', '"','\n', '\t', '[', ']'], '', $solution['response']);
-      #update the solution for the incident
       global $DB;
 
-      $query_create = "UPDATE glpibrain_solutions SET `solution` = '$real_solution' WHERE ticket_id = $id";
-      $query_update = "INSERT INTO glpi_itilsolutions (ticket_id, itemtype, items_id, `content`, date_creation, date_mod, users_id, users_id_editor, users_id_approval, status) VALUES $id, Ticket, 0, '&#60;p&#62;$real_solution&#60;/p&#62;', NOW(), NOW(), 2, 0, 0, 2";
+      $query_create = "UPDATE glpibrain_solutions 
+                        SET `solution` = '$real_solution' 
+                        WHERE ticket_id = $id";
+      $query_update = "INSERT INTO glpi_itilsolutions 
+                        (ticket_id, itemtype, items_id, `content`, date_creation, date_mod, users_id, users_id_editor, users_id_approval, status) 
+                        VALUES $id, Ticket, 0, '&#60;p&#62;$real_solution&#60;/p&#62;', NOW(), NOW(), 2, 0, 0, 2";
       $DB->query($query_create);
       $DB->query($query_update);
       return $real_solution;

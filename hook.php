@@ -61,9 +61,8 @@ function plugin_glpibrain_install()
     $default_collation = DBConnection::getDefaultCollation();
     $default_key_sign = DBConnection::getDefaultPrimaryKeySignOption();
 
-    #database is glpi_plugin_glpibrain_solutions
     if(!$DB->tableExists("glpibrain_solutions")) {
-        $query = "CREATE TABLE `glpi_plugin_glpibrain_solutions` (
+        $query = "CREATE TABLE `glpibrain_solutions` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `name` varchar(255) NOT NULL,
             `description` text NOT NULL,
@@ -72,16 +71,8 @@ function plugin_glpibrain_install()
             `is_active` tinyint(1) NOT NULL,
             PRIMARY KEY (`id`)
           ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} AUTO_INCREMENT=1";
-        $DB->query($query) or die("Error creating table glpi_plugin_glpibrain_solutions: ".$DB->error());
+        $DB->query($query) or die("Error creating table glpibrain_solutions: ".$DB->error());
     }
-
-
-    #look for the operating system and the user to give him privileges to execute docker.
-    $get_os = php_uname('s');
-    $user = $output = shell_exec('whoami');
-
-
-    #CronTask::Register(GlpiBrain::class, 'solutions', 'plugin_glpibrain', __('Solutions', 'glpibrain'), 'daily', 1);
     return true;
 }
 

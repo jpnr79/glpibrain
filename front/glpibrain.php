@@ -66,26 +66,25 @@ echo "<tbody>";
 
 // Create a new instance of the Glpibrain class and get the incidents
 
-switch($glpibrain->getOllamaStatus())
-{
+switch ($glpibrain->getOllamaStatus()) {
   case false:
     echo "<tr>";
     echo "<td colspan='8'>" . __('Ollama is not running') . "</td>";
     echo "</tr>";
     break;
   case true:
-  $data = $glpibrain->getIncidents();
-if (empty($data)) {
-  echo "<tr>";
-  echo "<td colspan='8'>" . __('No incidents found') . "</td>";
-  echo "</tr>";
-} else {
-  echo "<tr class='filters'>";
-  echo "<th><input type='number' id='searchById' onkeyup='searchonTableId()' onchange='searchonTableId()' placeholder='Id..'></th>";
-  echo "<th><input type='text' id='searchByTitle' onkeyup='searchonTableTitle()' onchange='searchonTableTitle()' placeholder='Title..'></th>";
-  echo "<th><input type='date' id='searchByDate' onkeyup='searchonTableDate()' onchange='searchonTableDate()' placeholder='Date..'></th>";
-  echo "<th><input type='text' id='searchByAsignee' onkeyup='searchonTableAsignee()' onchange='searchonTableAsignee()' placeholder='Assignee..'></th>";
-  echo "<th><select id='searchByStatus' onchange='searchonTableStatus()'>
+    $data = $glpibrain->getIncidents();
+    if (empty($data)) {
+      echo "<tr>";
+      echo "<td colspan='8'>" . __('No incidents found') . "</td>";
+      echo "</tr>";
+    } else {
+      echo "<tr class='filters'>";
+      echo "<th><input type='number' id='searchById' onkeyup='searchonTableId()' onchange='searchonTableId()' placeholder='Id..'></th>";
+      echo "<th><input type='text' id='searchByTitle' onkeyup='searchonTableTitle()' onchange='searchonTableTitle()' placeholder='Title..'></th>";
+      echo "<th><input type='date' id='searchByDate' onkeyup='searchonTableDate()' onchange='searchonTableDate()' placeholder='Date..'></th>";
+      echo "<th><input type='text' id='searchByAsignee' onkeyup='searchonTableAsignee()' onchange='searchonTableAsignee()' placeholder='Assignee..'></th>";
+      echo "<th><select id='searchByStatus' onchange='searchonTableStatus()'>
             <option value=''>" . __('All') . "</option>
             <option value='Processing (Assigned)'>" . __('Processing (Assigned)') . "</option>
             <option value='Processing (Planned)'>" . __('Processing (Planned)') . "</option>
@@ -94,35 +93,35 @@ if (empty($data)) {
             <option value='Closed'>" . __('Closed') . "</option>
             <option value='Unknown'>" . __('Unknown') . "</option>
             </select></td>";
-  echo "<th><input type='text' id='searchByCategory' onkeyup='searchonTableCategory()' placeholder='Category..'></th>";
-  echo "</tr>";
+      echo "<th><input type='text' id='searchByCategory' onkeyup='searchonTableCategory()' placeholder='Category..'></th>";
+      echo "</tr>";
 
-  // Populate the table rows
-  for ($index = 0; $index < count($data['incident_id']); $index++) {
-    echo "<tr>";
+      // Populate the table rows
+      for ($index = 0; $index < count($data['incident_id']); $index++) {
+        echo "<tr>";
 
-    #Add a link to the ticket on hover show the incident_content in a box
-    echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "'>" . $data['incident_id'][$index] . "</a></td>";
-    echo "<td> 
-                <a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "' onmouseover='showDetail(\"" . str_replace($forbidden_chars, '' ,$data['incident_content'][$index]) . "\")' onmouseleave=closeDiv()>" . $data['incident_title'][$index] . "</a>
+        #Add a link to the ticket on hover show the incident_content in a box
+        echo "<td><a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "'>" . $data['incident_id'][$index] . "</a></td>";
+        echo "<td> 
+                <a href='" . Ticket::getSearchURL() . "?id=" . $data['incident_id'][$index] . "' onmouseover='showDetail(\"" . str_replace($forbidden_chars, '', $data['incident_content'][$index]) . "\")' onmouseleave=closeDiv()>" . $data['incident_title'][$index] . "</a>
           </td>";
-    echo "<td>" . $data['incident_date'][$index] . "</td>";
-    echo "<td>" . $data['assignee_name'][$index] . "</td>";
-    //if php gives warning show loading from javascript
-    echo "<td>" . $glpibrain->getIncidentStatus($data['incident_status'][$index]) . "</td>";
-    echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index], $data['category_id'][$index]) . "</td>";
-    echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
-    #the button executes openWindow and send as arguments the incident_id, the incident content and, hidden, the csrf token
-    echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ",\"" . str_replace($forbidden_chars, '' ,$data['incident_content'][$index]) . "\",\"" . Session::getNewCSRFToken() . "\")'>" . __('+') . "</button></td>";
-    echo "</td>";
-    echo "</tr>";
-    Html::closeform();
-  }
+        echo "<td>" . $data['incident_date'][$index] . "</td>";
+        echo "<td>" . $data['assignee_name'][$index] . "</td>";
+        //if php gives warning show loading from javascript
+        echo "<td>" . $glpibrain->getIncidentStatus($data['incident_status'][$index]) . "</td>";
+        echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index], $data['category_id'][$index]) . "</td>";
+        echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
+        #the button executes openWindow and send as arguments the incident_id, the incident content and, hidden, the csrf token
+        echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ",\"" . str_replace($forbidden_chars, '', $data['incident_content'][$index]) . "\",\"" . Session::getNewCSRFToken() . "\")'>" . __('+') . "</button></td>";
+        echo "</td>";
+        echo "</tr>";
+        Html::closeform();
+      }
 
-  echo "</tbody>";
-  echo "</table>";
-  echo "</div>";
-}
+      echo "</tbody>";
+      echo "</table>";
+      echo "</div>";
+    }
 }
 
 // Register the display function to be called by GLPI
