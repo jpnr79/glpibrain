@@ -26,7 +26,7 @@ It is required to have installed:
 - Once GLPI is installed on your server, to install the plugin, clone the project or download the auto-generated zip, and unzip it in the plugin path of your glpi installation (usually located in /var/www/html/glpi/plugins).
 
 - Then, run
-  ``bash
+  ```bash
   composer.phar install
 
 ````
