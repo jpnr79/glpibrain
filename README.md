@@ -18,7 +18,7 @@ It is required to have installed:
 4. Composer (https://getcomposer.org/doc/00-intro.md)
 5. Docker
 6. Relational database (MySQL, MariaDB...) (recomended MariaDB)
-7. Extensiones de PHP recomendadas de GLPI (MySQLi, fileinfo, JSON...) ver https://glpi-install.readthedocs.io/en/latest/prerequisites.html
+7. GLPI recommended PHP extensions (MySQLi, fileinfo, JSON...) ver https://glpi-install.readthedocs.io/en/latest/prerequisites.html
 8. (Optional, only if your server has an Nvidia GPU) Nvidia container toolkit (https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installation)
 
 ## Installation
