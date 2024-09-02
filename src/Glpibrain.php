@@ -238,7 +238,7 @@ class Glpibrain extends CommonDBTM
       $url = "http://localhost:11434/api/generate";
       $data = '{
          "model": "llama3",
-         "prompt": "Classify this incident, answer as you were an IT technician: ' . $content . '",
+         "prompt": "Classify this incident, answer just with a word: ' . $content . '",
          "format": "json",
          "stream": false
        }';
@@ -325,7 +325,7 @@ class Glpibrain extends CommonDBTM
       $url = "http://localhost:11434/api/generate";
       $data = '{
          "model": "llama3",
-         "prompt": "Solve this incident, answer as you were an IT technician: ' . $content . '",
+         "prompt": "Solve this incident, answer few words: ' . $content . '",
          "format": "json",
          "stream": false
        }';
@@ -393,4 +393,43 @@ class Glpibrain extends CommonDBTM
       $DB->query($query_update);
       return $real_solution;
    }
+
+public function retrainCategory($id, $real_category)
+{
+   $incident = $this->getIncident($id);
+   $url = "http://localhost:11434/api/generate";
+   $data = '{
+         "model": "llama3",
+         "prompt": "The solution for this incident: ' . $incident['incident_content'] . ' is wrong, the correct category is: ' . $real_category . ' please keep it in mind for next time.",
+         "format": "json",
+         "stream": false
+         }';
+   $ch = curl_init();
+
+   curl_setopt($ch, CURLOPT_URL, $url);
+   curl_setopt($ch, CURLOPT_POST, 1);
+   curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+   $response = curl_exec($ch);
+
+   global $DB;
+
+   $query_create = "INSERT INTO glpi_itilcategories (
+         name, `completename`, `comment`, level,
+         code, `ancestors_cache`, date_mod, date_creation
+         ) 
+         VALUES 
+         ('$real_category', '$real_category', '', '1', '', '[]', NOW(), NOW()
+         )";
+   $query_update = "UPDATE glpi_tickets
+         SET itilcategories_id = (
+         SELECT id 
+         FROM glpi_itilcategories 
+         WHERE name = '$real_category') 
+         WHERE id = $id";
+   $DB->query($query_create);
+   $DB->query($query_update);
+   return $real_category;
+}
 }

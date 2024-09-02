@@ -54,6 +54,7 @@ td button {
     width: 20%;
     text-align: center;
     border-radius: 5px;
+    margin: 5px;
 }
 
 p {

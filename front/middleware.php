@@ -60,3 +60,31 @@ if (isset($_POST['action']) && $_POST['action'] == 'retrainSolution') {
     echo json_encode(['status' => 'success']);
     exit();
 }
+
+if (isset($_POST['action']) && $_POST['action'] == 'retrainCategory') {
+    
+    // Check if the arguments are set
+    if (!isset($_POST['arguments'])) {
+        echo "Arguments not set";
+        exit();
+    }
+    // Check if the arguments are an array
+    if (!is_array($_POST['arguments'])) {
+        echo "Arguments are not an array";
+        exit();
+    }
+    // Check if the arguments are of the correct length
+    if (count($_POST['arguments']) != 2) {
+        echo "Incorrect number of arguments";
+        exit();
+    }
+    // Check if the arguments are of the correct type
+    if (!is_string($_POST['arguments'][0]) || !is_string($_POST['arguments'][1])) {
+        echo "Incorrect argument type";
+        exit();
+    }
+    // Call the retrainCategory function
+    $glpibrain->retrainCategory($_POST['arguments'][0], $_POST['arguments'][1]);
+    echo json_encode(['status' => 'success']);
+    exit();
+}

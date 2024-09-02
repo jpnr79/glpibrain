@@ -50,7 +50,7 @@ echo <<<HTML
         <th>Status</th>
         <th>Category</th>
         <th>Expected Solution</th>
-        <th>Real Solution</th>
+        <th>Real Solution/Category</th>
       </tr>
     </thead>
   <tbody>
@@ -100,7 +100,8 @@ if ($glpibrain->getOllamaStatus()) {
       echo "<td>" . $glpibrain->getIncidentCategory($data['incident_id'][$index], $data['category_id'][$index]) . "</td>";
       echo "<td>" . $glpibrain->getIncidentSolution($data['incident_id'][$index]) . "</td>";
       #the button executes openWindow and send as arguments the incident_id, the incident content and, hidden, the csrf token
-      echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ",\"" . str_replace($forbidden_chars, '', $data['incident_content'][$index]) . "\",\"" . Session::getNewCSRFToken() . "\")'>" . __('+') . "</button></td>";
+      echo "<td><button onclick='openWindow(" . $data['incident_id'][$index] . ",\"" . str_replace($forbidden_chars, '', $data['incident_content'][$index]) . "\",\"" . Session::getNewCSRFToken() . "\")'>" . __('S') . "</button>";
+      echo "<button onclick='openWindowCategory(" . $data['incident_id'][$index] . ",\"" . str_replace($forbidden_chars, '', $data['incident_content'][$index]) . "\",\"" . Session::getNewCSRFToken() . "\")'>" . __('C') . "</button></td>";
       echo "</td>";
       echo "</tr>";
       Html::closeform();
