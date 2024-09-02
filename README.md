@@ -1,7 +1,7 @@
 # GLPIBrain GLPI plugin
 ![image](https://github.com/user-attachments/assets/676d6c91-31ee-4cc9-a8af-a658327db205)
 
-# GLPI Brain final degree project
+# Final degree project
 
 This repository contains a final degree project in computer engineering.
 
