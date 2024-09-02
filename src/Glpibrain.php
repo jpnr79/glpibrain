@@ -1,4 +1,3 @@
-
 <?php
 
 /**
@@ -269,7 +268,12 @@ class Glpibrain extends CommonDBTM
                               ('$f_category', '$f_category', '', '1', '', '[]', NOW(), NOW()
                               )";
             $query_update = "UPDATE glpi_tickets
-                               SET itilcategories_id = (SELECT id FROM glpi_itilcategories WHERE name = '$f_category') WHERE id = $id";
+                               SET itilcategories_id = (
+                               SELECT id 
+                               FROM glpi_itilcategories 
+                               WHERE name = '$f_category') 
+                               WHERE id = $id";
+
             $DB->query($query_create);
             $DB->query($query_update);
          }
@@ -287,7 +291,9 @@ class Glpibrain extends CommonDBTM
    {
       // Fetch the category data from glpi database
       global $DB;
-      $query = "SELECT solution FROM glpibrain_solutions WHERE ticket_id = $id";
+      $query = "SELECT solution 
+                FROM glpibrain_solutions 
+                WHERE ticket_id = $id";
       $data = $DB->request($query);
       #if rows are returned, then the category exists
       if ($data->numRows() > 0) {
@@ -299,11 +305,6 @@ class Glpibrain extends CommonDBTM
          $solution = $this->solveIncident($id);
          return $solution;
       }
-   }
-
-   private function ErrorHandler($errno, $errstr, $errfile, $errline)
-   {
-      echo "Error: [$errno] $errstr";
    }
 
    /**
