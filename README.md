@@ -7,6 +7,9 @@ This repository contains a final degree project in computer engineering.
 
 Plugin for the open source IT management system GLPI, based on a neural network system that allows to classify incidents, identify patterns and recommend solutions.
 
+![image](https://github.com/user-attachments/assets/e82af69f-4787-43d0-ad13-e63a432ad87f)
+
+
 The operation is performed through the llama3 api, to which requests are made to know the categorization and possible solution to the incidents that are not marked as solved in glpi.
 
 ## Requierements
