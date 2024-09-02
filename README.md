@@ -55,6 +55,9 @@ docker exec -it ollama ollama run llama3
 - P: The plugin doesn't show up in glpi
 - A: Check if it is enabled on plugins page. Refresh the page and wait for a few seconds, if still not showing up, move to another directory and move back again.
 
+- P: The relational database isn't working with GLPI/plugin.
+- A: Check if the user you set up during the installation have the full rights to use the database.
+
 ## Authors
 
 - [@nselar](https://www.github.com/nselar)
