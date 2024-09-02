@@ -26,15 +26,14 @@ It is required to have installed:
 - Once GLPI is installed on your server, to install the plugin, clone the project or download the auto-generated zip, and unzip it in the plugin path of your glpi installation (usually located in /var/www/html/glpi/plugins).
 
 - Then, run
-  ```bash
-  composer.phar install
-
-````
+```bash
+composer.phar install
+```
 
 - Now pull the docker container from Ollama, depending if you have Nvidia GPU, the port by default i 11434:
 ```bash
 docker run -d --gpus=all -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
-````
+```
 
 - Or if wanted to run only with CPU:
 
