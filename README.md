@@ -1,5 +1,5 @@
-# GLPIBrain GLPI plugin ![image](https://github.com/user-attachments/assets/e0829406-a941-44f7-9c3d-3c5108edbc6d)
-
+# GLPIBrain GLPI plugin
+![image](https://github.com/user-attachments/assets/676d6c91-31ee-4cc9-a8af-a658327db205)
 
 # GLPI Brain final degree project
 
