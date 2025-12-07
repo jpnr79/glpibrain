@@ -33,9 +33,13 @@
 // Purpose of file: Glpibrain class
 // ----------------------------------------------------------------------
 
-require __DIR__ . '/../vendor/autoload.php';
-
-include('../vendor/autoload.php');
+// Try to include the plugin's composer autoload if present. Some setups
+// don't run `composer install` for plugins, so guard the include to
+// avoid a fatal error during plugin discovery.
+$autoload = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($autoload)) {
+   require $autoload;
+}
 
 // Avoid direct access to the file
 if (!defined('GLPI_ROOT')) {
