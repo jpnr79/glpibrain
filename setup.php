@@ -77,8 +77,8 @@ function plugin_version_glpibrain()
         'homepage'       => '',
         'requirements'   => [
             'glpi' => [
-                'min' => PLUGIN_GLPIBRAIN_MIN_GLPI_VERSION,
-                'max' => PLUGIN_GLPIBRAIN_MAX_GLPI_VERSION,
+                'min' => '11.0',
+                'max' => '12.0',
             ]
         ]
     ];
