@@ -3,7 +3,7 @@
    <key>glpibrain</key>
    <!-- stable, beta, development, alpha, ... -->
    <state>alpha</state>
-   <logo>https://github.com/nselar/GLPI-Brain/blob/main/glpibrainlogo.png?raw=true</logo>
+   <logo>https://raw.githubusercontent.com/glpi-project/glpi-plugin-glpibrain/main/glpibrainlogo.png</logo>
    <description>
       <short>
          <!-- Add as many lang tag you want -->
@@ -16,10 +16,10 @@
          <fr>Un description longue pour le plugin GLPI GLPIBrain</fr>
       </long>
    </description>
-   <homepage>https://github.com/pluginsGLPI/glpibrain</homepage>
-   <download>https://github.com/pluginsGLPI/glpibrain/releases</download>
-   <issues>https://github.com/pluginsGLPI/glpibrain/issues</issues>
-   <readme>https://github.com/pluginsGLPI/glpibrain/blob/master/README.md</readme>
+   <homepage>https://github.com/glpi-project/glpi-plugin-glpibrain</homepage>
+   <download>https://github.com/glpi-project/glpi-plugin-glpibrain/releases</download>
+   <issues>https://github.com/glpi-project/glpi-plugin-glpibrain/issues</issues>
+   <readme>https://github.com/glpi-project/glpi-plugin-glpibrain/blob/main/README.md</readme>
    <authors>
       <!-- Add as many author tag you want -->
       <author>Nicolás Sela</author>
@@ -27,11 +27,9 @@
    <versions>
       <!-- Add as many version tag you want -->
       <version>
-         <num>0.0.1</num>
-         <!-- Add as many compatibility tag you want -->
-         <compatibility>9.4</compatibility>
-         <compatibility>9.3</compatibility>
-         <compatibility>9.2</compatibility>
+         <num>1.0.0</num>
+         <compatibility>~11.0.0</compatibility>
+         <download_url>https://github.com/glpi-project/glpi-plugin-glpibrain/releases/download/1.0.0/glpibrain-1.0.0.tar.gz</download_url>
       </version>
    </versions>
    <langs>
