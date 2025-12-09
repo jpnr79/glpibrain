@@ -55,7 +55,10 @@ function plugin_glpibrain_install()
     $config = new Config();
     $config->setConfigurationValues('plugin:glpibrain', ['configuration' => false]);
  
-    ProfileRight::addProfileRights(['glpibrain:read']);
+    // Check if profile rights already exist before adding them
+    if (countElementsInTable('glpi_profilerights', ['name' => 'glpibrain:read']) == 0) {
+        ProfileRight::addProfileRights(['glpibrain:read']);
+    }
  
     $default_charset = DBConnection::getDefaultCharset();
     $default_collation = DBConnection::getDefaultCollation();
@@ -63,15 +66,15 @@ function plugin_glpibrain_install()
 
     if(!$DB->tableExists("glpibrain_solutions")) {
         $query = "CREATE TABLE `glpibrain_solutions` (
-            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             `name` varchar(255) NOT NULL,
             `description` text NOT NULL,
-            `date_creation` datetime NOT NULL,
-            `date_mod` datetime NOT NULL,
+            `date_creation` TIMESTAMP NULL DEFAULT NULL,
+            `date_mod` TIMESTAMP NULL DEFAULT NULL,
             `is_active` tinyint(1) NOT NULL,
             PRIMARY KEY (`id`)
           ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} AUTO_INCREMENT=1";
-        $DB->query($query) or die("Error creating table glpibrain_solutions: ".$DB->error());
+        $DB->doQuery($query) or die("Error creating table glpibrain_solutions: ".$DB->error());
     }
     return true;
 }
