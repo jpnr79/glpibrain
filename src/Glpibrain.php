@@ -94,13 +94,36 @@ class Glpibrain extends CommonDBTM
    {
       // Fetch the tickets data from glpi database
       global $DB;
-      $query = "SELECT ticket.id AS incident_id, ticket.name AS incident_title, ticket.date_creation AS incident_date, u.name AS assignee_name, ticket.status AS incident_status, IFNULL(ticket.itilcategories_id, 0) AS category_id, ticket.content AS incident_content
-                  FROM glpi_tickets ticket
-                  JOIN glpi_tickets_users tu ON ticket.id = tu.tickets_id AND tu.type = 2
-                  JOIN glpi_users u ON tu.users_id = u.id
-                  WHERE ticket.is_deleted = 0";
-
-      $data = $DB->request($query);
+      
+      // Use GLPI 11 compliant query with criteria array
+      $data = $DB->request([
+         'SELECT' => [
+            'ticket.id AS incident_id',
+            'ticket.name AS incident_title',
+            'ticket.date_creation AS incident_date',
+            'u.name AS assignee_name',
+            'ticket.status AS incident_status',
+            'new \QueryExpression("IFNULL(ticket.itilcategories_id, 0)") AS category_id',
+            'ticket.content AS incident_content'
+         ],
+         'FROM' => 'glpi_tickets AS ticket',
+         'INNER JOIN' => [
+            'glpi_tickets_users AS tu' => [
+               'ON' => [
+                  'ticket' => 'id',
+                  'tu' => 'tickets_id',
+                  ['AND' => ['tu.type' => 2]]
+               ]
+            ],
+            'glpi_users AS u' => [
+               'ON' => [
+                  'tu' => 'users_id',
+                  'u' => 'id'
+               ]
+            ]
+         ],
+         'WHERE' => ['ticket.is_deleted' => 0]
+      ]);
       if ($data) {
          $dataArray = [];
          foreach ($data as $row) {
