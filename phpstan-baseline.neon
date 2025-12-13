@@ -1,0 +1,85 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined static method Session\:\:getNewCSRFToken\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: front/glpibrain.php
+
+		-
+			message: '#^Class Glpibrain referenced with incorrect case\: GlpiBrain\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: front/middleware.php
+
+		-
+			message: '#^Call to an undefined static method ProfileRight\:\:deleteProfileRights\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: hook.php
+
+		-
+			message: '#^Call to static method getDefaultCharset\(\) on an unknown class DBConnection\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hook.php
+
+		-
+			message: '#^Call to static method getDefaultCollation\(\) on an unknown class DBConnection\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hook.php
+
+		-
+			message: '#^Call to static method getDefaultPrimaryKeySignOption\(\) on an unknown class DBConnection\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hook.php
+
+		-
+			message: '#^Function plugin_change_profile_glpibrain\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: hook.php
+
+		-
+			message: '#^Instantiated class Config not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: hook.php
+
+		-
+			message: '#^Class Glpibrain referenced with incorrect case\: GlpiBrain\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: setup.php
+
+		-
+			message: '#^Access to an undefined static property static\(Glpibrain\)\:\:\$rightname\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Glpibrain.php
+
+		-
+			message: '#^Method Glpibrain\:\:classifyIncident\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Glpibrain.php
+
+		-
+			message: '#^Method Glpibrain\:\:getIncidentCategory\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Glpibrain.php
+
+		-
+			message: '#^Method Glpibrain\:\:getIncidentSolution\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Glpibrain.php
+
+		-
+			message: '#^Method Glpibrain\:\:solveIncident\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: src/Glpibrain.php
