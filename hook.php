@@ -61,23 +61,7 @@ function plugin_glpibrain_install()
         ProfileRight::addProfileRights(['glpibrain:read']);
     }
  
-    $default_charset = DBConnection::getDefaultCharset();
-    $default_collation = DBConnection::getDefaultCollation();
-    $default_key_sign = DBConnection::getDefaultPrimaryKeySignOption();
-
-        if(!Migration::tableExists("glpibrain_solutions")) {
-            $migration = new Migration('glpibrain');
-            $query = "CREATE TABLE `glpibrain_solutions` (
-                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                `name` varchar(255) NOT NULL,
-                `description` text NOT NULL,
-                `date_creation` TIMESTAMP NULL DEFAULT NULL,
-                `date_mod` TIMESTAMP NULL DEFAULT NULL,
-                `is_active` tinyint(1) NOT NULL,
-                PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} AUTO_INCREMENT=1";
-            $migration->executeDbQuery($query);
-        }
+    // Table creation is now handled by migration files in sql/migration_1.0.0.sql
             // Table creation is now handled by migration files in sql/migration_1.0.0.sql
     return true;
 }
@@ -95,12 +79,7 @@ function plugin_glpibrain_uninstall()
 
     ProfileRight::deleteProfileRights(['glpibrain:read']);
 
-    if(Migration::tableExists("glpibrain_solutions")) {
-        $migration = new Migration('glpibrain-uninstall');
-        $query = "DROP TABLE IF EXISTS `glpibrain_solutions`";
-        $migration->executeDbQuery($query);
-    }
-        // Table drop is now handled by migration files in sql/migration_1.0.0.sql
+    // Table drop is now handled by migration files in sql/migration_1.0.0.sql
 
     return true;
 }
