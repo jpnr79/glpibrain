@@ -90,9 +90,83 @@ function plugin_version_glpibrain()
  *
  * @return boolean
  */
+
 function plugin_glpibrain_check_prerequisites()
 {
-
+    $min_version = defined('PLUGIN_GLPIBRAIN_MIN_GLPI_VERSION') ? PLUGIN_GLPIBRAIN_MIN_GLPI_VERSION : '10.0.0';
+    $max_version = defined('PLUGIN_GLPIBRAIN_MAX_GLPI_VERSION') ? PLUGIN_GLPIBRAIN_MAX_GLPI_VERSION : '12.0.99';
+    $glpi_version = null;
+    $glpi_root = '/var/www/glpi';
+    $version_dir = $glpi_root . '/version';
+    if (is_dir($version_dir)) {
+        $files = scandir($version_dir, SCANDIR_SORT_DESCENDING);
+        foreach ($files as $file) {
+            if ($file[0] !== '.' && preg_match('/^\d+\.\d+\.\d+$/', $file)) {
+                $glpi_version = $file;
+                break;
+            }
+        }
+    }
+    // Load Toolbox if not loaded
+    if (!class_exists('Toolbox') && file_exists($glpi_root . '/src/Toolbox.php')) {
+        require_once $glpi_root . '/src/Toolbox.php';
+    }
+    // Fallback error logger if Toolbox::logInFile is unavailable
+    if (!function_exists('glpibrain_fallback_log')) {
+        function glpibrain_fallback_log($msg) {
+            $logfile = __DIR__ . '/glpibrain_error.log';
+            $date = date('Y-m-d H:i:s');
+            file_put_contents($logfile, "[$date] $msg\n", FILE_APPEND);
+        }
+    }
+    if ($glpi_version === null) {
+        $logmsg = '[setup.php:plugin_glpibrain_check_prerequisites] ERROR: GLPI version not detected.';
+        if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+            try {
+                Toolbox::logInFile('glpibrain', $logmsg);
+            } catch (Throwable $e) {
+                glpibrain_fallback_log($logmsg . ' (Toolbox::logInFile failed: ' . $e->getMessage() . ')');
+            }
+        } else {
+            glpibrain_fallback_log($logmsg);
+        }
+        echo "This plugin requires GLPI >= $min_version";
+        return false;
+    }
+    if (version_compare($glpi_version, $min_version, '<')) {
+        $logmsg = sprintf(
+            'ERROR [setup.php:plugin_glpibrain_check_prerequisites] GLPI version %s is less than required minimum %s, user=%s',
+            $glpi_version, $min_version, $_SESSION['glpiname'] ?? 'unknown'
+        );
+        if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+            try {
+                Toolbox::logInFile('glpibrain', $logmsg);
+            } catch (Throwable $e) {
+                glpibrain_fallback_log($logmsg . ' (Toolbox::logInFile failed: ' . $e->getMessage() . ')');
+            }
+        } else {
+            glpibrain_fallback_log($logmsg);
+        }
+        echo "This plugin requires GLPI >= $min_version";
+        return false;
+    }
+    if (version_compare($glpi_version, $max_version, '>')) {
+        $logmsg = sprintf(
+            'ERROR [setup.php:plugin_glpibrain_check_prerequisites] GLPI version %s is greater than supported maximum %s, user=%s',
+            $glpi_version, $max_version, $_SESSION['glpiname'] ?? 'unknown'
+        );
+        if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+            try {
+                Toolbox::logInFile('glpibrain', $logmsg);
+            } catch (Throwable $e) {
+                glpibrain_fallback_log($logmsg . ' (Toolbox::logInFile failed: ' . $e->getMessage() . ')');
+            }
+        } else {
+            glpibrain_fallback_log($logmsg);
+        }
+        echo "This plugin requires GLPI <= $max_version";
+        return false;
+    }
     return true;
 }
 
